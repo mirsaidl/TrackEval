@@ -119,6 +119,9 @@ class MotChallenge2DBox(_BaseDataset):
             else:
                 for seq in self.seq_list:
                     curr_file = os.path.join(self.tracker_fol, tracker, self.tracker_sub_fol, seq + '.txt')
+
+                    print(self.tracker_fol, tracker, self.tracker_sub_fol, seq + '.txt')
+                    
                     if not os.path.isfile(curr_file):
                         print('Tracker file not found: ' + curr_file)
                         raise TrackEvalException(
@@ -159,6 +162,7 @@ class MotChallenge2DBox(_BaseDataset):
             with open(seqmap_file) as fp:
                 reader = csv.reader(fp)
                 for i, row in enumerate(reader):
+                    print(row)
                     if i == 0 or row[0] == '':
                         continue
                     seq = row[0]
@@ -225,7 +229,7 @@ class MotChallenge2DBox(_BaseDataset):
             time_key = str(t+1)
             if time_key in read_data.keys():
                 try:
-                    time_data = np.asarray(read_data[time_key], dtype=np.float)
+                    time_data = np.asarray(read_data[time_key], dtype=np.float32)
                 except ValueError:
                     if is_gt:
                         raise TrackEvalException(
@@ -356,7 +360,7 @@ class MotChallenge2DBox(_BaseDataset):
 
             # Match tracker and gt dets (with hungarian algorithm) and remove tracker dets which match with gt dets
             # which are labeled as belonging to a distractor class.
-            to_remove_tracker = np.array([], np.int)
+            to_remove_tracker = np.array([], np.int32)
             if self.do_preproc and self.benchmark != 'MOT15' and gt_ids.shape[0] > 0 and tracker_ids.shape[0] > 0:
 
                 # Check all classes are valid:
@@ -410,14 +414,14 @@ class MotChallenge2DBox(_BaseDataset):
             gt_id_map[unique_gt_ids] = np.arange(len(unique_gt_ids))
             for t in range(raw_data['num_timesteps']):
                 if len(data['gt_ids'][t]) > 0:
-                    data['gt_ids'][t] = gt_id_map[data['gt_ids'][t]].astype(np.int)
+                    data['gt_ids'][t] = gt_id_map[data['gt_ids'][t]].astype(np.int32)
         if len(unique_tracker_ids) > 0:
             unique_tracker_ids = np.unique(unique_tracker_ids)
             tracker_id_map = np.nan * np.ones((np.max(unique_tracker_ids) + 1))
             tracker_id_map[unique_tracker_ids] = np.arange(len(unique_tracker_ids))
             for t in range(raw_data['num_timesteps']):
                 if len(data['tracker_ids'][t]) > 0:
-                    data['tracker_ids'][t] = tracker_id_map[data['tracker_ids'][t]].astype(np.int)
+                    data['tracker_ids'][t] = tracker_id_map[data['tracker_ids'][t]].astype(np.int32)
 
         # Record overview statistics.
         data['num_tracker_dets'] = num_tracker_dets
